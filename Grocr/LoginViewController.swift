@@ -26,6 +26,14 @@ import QuartzCore
 
 class LoginViewController: UIViewController {
 
+    struct currentUser {
+        static var currentUserRef = Firebase?()
+        static var currentUser = ""
+        let ref = Firebase(url: "https://containers.firebaseio.com/grocery-items/")
+
+    }
+    
+    
   // MARK: Constants
   let LoginToList = "LoginToList"
     
@@ -34,10 +42,12 @@ class LoginViewController: UIViewController {
   @IBOutlet weak var textFieldLoginPassword: UITextField!
   
   // MARK: Properties
-  let ref = Firebase(url: "https://containers.firebaseio.com")
-  
+  var ref = Firebase(url: "https://containers.firebaseio.com/grocery-items/")
+  var user: User!
     
+   
     
+   
   // MARK: UIViewController Lifecycle
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -46,30 +56,62 @@ class LoginViewController: UIViewController {
   override func viewDidAppear(animated: Bool) {
     super.viewDidAppear(animated)
     
-    ref.observeAuthEventWithBlock { (authData) -> Void in
-        
-//        if authData != nil {
-//            self.performSegueWithIdentifier(self.LoginToList, sender: nil)
-//        }
-    
-    }}
+//    ref.observeAuthEventWithBlock { (authData) -> Void in
+//        
+////        if authData != nil {
+////            self.performSegueWithIdentifier(self.LoginToList, sender: nil)
+////        }
+//    
+//    }
+    }
   
   // MARK: Actions
   @IBAction func loginDidTouch(sender: AnyObject) {
-    
-    ref.authUser(textFieldLoginEmail.text, password: textFieldLoginPassword.text, withCompletionBlock: { (error, auth) -> Void in
-      
+    self.ref.authUser(textFieldLoginEmail.text, password: textFieldLoginPassword.text, withCompletionBlock: { (error, auth) in
+
     })
-    ref.observeAuthEventWithBlock { (authData) -> Void in
-        
+   
+    
+    ref.observeAuthEventWithBlock { authData in
         if authData != nil {
+
+                    self.user = User(authData: authData)
+         self.ref.childByAppendingPath("\(self.ref.authData.uid)/")
+
+                    // Create a child reference with a unique id
+//                    self.ref.childByAppendingPath(self.user.uid)
+//                    print(currentUser.currentUserRef)
+                    // Save the current user to the online users list
+//                    self.ref.setValue(self.user.email)
+//            currentUser.currentUser = User(authData: authData).email
+//            print(currentUser.currentUser)
             self.performSegueWithIdentifier(self.LoginToList, sender: nil)
         }
 
     
   }
+    
+  
+    
     }
+    
+//    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+//        if segue.identifier == "LoginToList"{
+//         
+//            let SecondVC: GroceryListTableViewController = segue.destinationViewController as! GroceryListTableViewController
+//            
+//            //            let rowIndex: NSIndexPath = tableView.indexPathForSelectedRow!
+//            //            let path = tableView.indexPathForSelectedRow
+//            //            let cell = tableView.cellForRowAtIndexPath(NSIndexPath(index: Reference.buttonRowRef!)) as! GroceryCell
+//            
+//            SecondVC.currentUser = currentUser.currentUserRef
+//            
+//            
+//        }}
 
+    @IBAction func LogOut(sender: UIButton) {
+        ref.unauth()
+    }
   @IBAction func signUpDidTouch(sender: AnyObject) {
     let alert = UIAlertController(title: "Register",
       message: "Register",
@@ -88,6 +130,7 @@ class LoginViewController: UIViewController {
             self.ref.authUser(emailField.text, password: passwordField.text, withCompletionBlock: { (error, auth) in
 
             })
+            
           }
         }
       

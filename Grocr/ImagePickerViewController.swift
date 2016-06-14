@@ -106,7 +106,6 @@ class ImagePickerViewController: UIViewController, UIImagePickerControllerDelega
             let base64String = imageData!.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.Encoding64CharacterLineLength)
 //            print(base64String)
             let imageRef = GroceryListTableViewController.Reference.ref.childByAppendingPath("image")
-            
             imageRef.setValue(base64String)
             imagePicked = true
 //            performSegueWithIdentifier("goBack", sender: nil)

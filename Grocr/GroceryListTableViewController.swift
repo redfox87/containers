@@ -25,7 +25,7 @@ import UIKit
 class GroceryListTableViewController: UITableViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     struct Reference {
          static var ref = Firebase(url: "https://containers.firebaseio.com/grocery-items/")
-         static var pathArray = ["https://containers.firebaseio.com/grocery-items/"]
+         static var pathArray = ["https://containers.firebaseio.com/grocery-items/\(Reference.ref.authData.uid)/"]
         static var extraRef: String? = ""
         static var buttonRowRef: Int?
     }
@@ -41,7 +41,7 @@ class GroceryListTableViewController: UITableViewController, UIImagePickerContro
   // MARK: Properties
   var items = [GroceryItem]()
 //  var ref = Firebase(url: "https://containers.firebaseio.com/grocery-items/")
-  let usersRef = Firebase(url: "https://grocr-app.firebaseio.com/online")
+  let usersRef = Firebase(url: "https://containers.firebaseio.com/")
   var user: User!
   var backPath: UIBarButtonItem!
   var newPath = ""
@@ -57,7 +57,7 @@ class GroceryListTableViewController: UITableViewController, UIImagePickerContro
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    
+    Reference.ref = Reference.ref.childByAppendingPath("\(Reference.ref.authData.uid)/")
     
     // Set up swipe to delete
     tableView.allowsMultipleSelectionDuringEditing = false
@@ -75,8 +75,9 @@ class GroceryListTableViewController: UITableViewController, UIImagePickerContro
     print(Reference.ref)
     // [1] Call the queryOrderedByChild function to return a reference that queries by the "completed" property
     Reference.ref = Firebase(url: Reference.pathArray[Reference.pathArray.count - 1])
-
-    Reference.ref.queryOrderedByChild("completed").observeEventType(.Value, withBlock: { snapshot in
+    
+     Reference.ref.queryOrderedByChild("completed").observeEventType(.Value, withBlock: { snapshot in
+//    Reference.ref.queryOrderedByChild("addedByUser").queryEqualToValue(LoginViewController.currentUser.currentUser).observeEventType(.Value, withBlock: { snapshot in
       
       var newItems = [GroceryItem]()
 //        print(snapshot)
@@ -110,23 +111,23 @@ class GroceryListTableViewController: UITableViewController, UIImagePickerContro
 //        })
     
     
-    Reference.ref.observeAuthEventWithBlock { authData in
-      
-      if authData != nil {
-        
-        self.user = User(authData: authData)
-        
-        // Create a child reference with a unique id
-        let currentUserRef = self.usersRef.childByAutoId()
-        
-        // Save the current user to the online users list
-        currentUserRef.setValue(self.user.email)
-        
-        // When the user disconnects remove the value
-        currentUserRef.onDisconnectRemoveValue()
-      }
-      
-    }
+//    Reference.ref.observeAuthEventWithBlock { authData in
+//      
+//      if authData != nil {
+//        
+//        self.user = User(authData: authData)
+//        
+//        // Create a child reference with a unique id
+//        let currentUserRef = self.usersRef.childByAutoId()
+//        
+//        // Save the current user to the online users list
+//        currentUserRef.setValue(self.user.email)
+//        
+//        // When the user disconnects remove the value
+//        currentUserRef.onDisconnectRemoveValue()
+//      }
+//      
+//    }
     
     // Create a value observer
     usersRef.observeEventType(.Value, withBlock: { (snapshot: FDataSnapshot!) in
@@ -141,7 +142,8 @@ class GroceryListTableViewController: UITableViewController, UIImagePickerContro
 //        self.userCountBarButtonItem?.title = "0"
 //      }
     })
-    
+    self.tableView.reloadData()
+
   }
   
   override func viewDidDisappear(animated: Bool) {
@@ -309,7 +311,7 @@ class GroceryListTableViewController: UITableViewController, UIImagePickerContro
 //    print(Reference.pathArray, Reference.pathArray.count)
     
     viewDidAppear(true)
-    //self.tableView.reloadData()
+    self.tableView.reloadData()
     
     }
     
